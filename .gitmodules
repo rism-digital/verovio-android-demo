@@ -1,0 +1,3 @@
+[submodule "external/verovio"]
+	path = external/verovio
+	url = https://github.com/rism-digital/verovio.git
