@@ -57,6 +57,15 @@ android {
     }
 }
 
+tasks.register<Copy>("copyVerovioData") {
+    from(rootDir.resolve("external/verovio/data"))
+    into("src/main/assets/verovio/data")
+}
+
+tasks.named("preBuild") {
+    dependsOn("copyVerovioData")
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
