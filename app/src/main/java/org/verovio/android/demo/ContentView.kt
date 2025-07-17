@@ -1,7 +1,5 @@
 package org.verovio.android.demo
 
-import android.content.res.AssetManager
-import android.content.res.Configuration
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Box
@@ -19,13 +17,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import android.content.Context
@@ -37,12 +33,14 @@ class ContentView(resourcePath: String) : ViewModel() {
     // Native wrapper instance
     private val toolkitWrapper = VerovioToolkitWrapper(resourcePath)
 
-    var svgString = mutableStateOf("<svg></svg>") // initial placeholder
+    var svgString = mutableStateOf("<svg></svg>")
+    val fontOptions = listOf("Leipzig", "Bravura", "Leland", "Petaluma")
 
-    var viewSize by mutableStateOf(IntSize.Zero)
-    var currentPage by mutableStateOf(1)
-    var scaleIndex by mutableStateOf(3)
-    val scaleValues = listOf(50, 60, 80, 100, 150, 200)
+    private var viewSize by mutableStateOf(IntSize.Zero)
+    private var currentPage by mutableStateOf(1)
+    private var scaleIndex by mutableStateOf(3)
+    private val scaleValues = listOf(50, 60, 80, 100, 150, 200)
+    private var selectedFont = "Leipzig"
 
     fun destroyWrapper() {
         toolkitWrapper.release()
@@ -65,18 +63,23 @@ class ContentView(resourcePath: String) : ViewModel() {
     fun onZoomIn() {
         if (scaleIndex < scaleValues.size - 1) {
             scaleIndex++
-            applyZoom();
+            applyZoom()
         }
     }
 
     fun onZoomOut() {
         if (scaleIndex > 0) {
             scaleIndex--
-            applyZoom();
+            applyZoom()
         }
     }
 
-    fun onSelectFont(font: String) {}
+    fun onFontSelect(font: String) {
+        if (selectedFont != font) {
+            selectedFont = font
+            applyFont()
+        }
+    }
 
     fun onSize(size: IntSize) {
         if (viewSize == size) return
@@ -89,6 +92,16 @@ class ContentView(resourcePath: String) : ViewModel() {
         val mei = inputStream.bufferedReader().use { it.readText() }
         toolkitWrapper.loadData(mei)
         svgString.value = toolkitWrapper.renderToSVG(1)
+    }
+
+    private fun applyFont() {
+        val scaleOptionsJSON = """{"font": "$selectedFont"}"""
+        toolkitWrapper.setOptions(scaleOptionsJSON)
+        toolkitWrapper.redoLayout()
+        if (toolkitWrapper.getPageCount() < currentPage) {
+            currentPage = toolkitWrapper.getPageCount()
+        }
+        svgString.value = toolkitWrapper.renderToSVG(currentPage)
     }
 
     private fun applyZoom() {
@@ -112,19 +125,7 @@ class ContentView(resourcePath: String) : ViewModel() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBarWithMenu(viewModel: ContentView) {
-    val fonts = listOf("Leipzig", "Bravura", "Leland", "Petaluma")
     var expanded by remember { mutableStateOf(false) }
-
-    val configuration = LocalConfiguration.current
-    // React to orientation changes
-    LaunchedEffect(configuration.orientation) {
-        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            println("Landscape mode")
-            // You can trigger ViewModel updates or other actions here
-        } else {
-            println("Portrait mode")
-        }
-    }
 
     TopAppBar(
         title = { },
@@ -161,11 +162,11 @@ fun TopAppBarWithMenu(viewModel: ContentView) {
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    fonts.forEach { font ->
+                    viewModel.fontOptions.forEach { font ->
                         DropdownMenuItem(
                             text = { Text(font) },
                             onClick = {
-                                viewModel.onSelectFont(font)
+                                viewModel.onFontSelect(font)
                                 expanded = false
                             }
                         )
