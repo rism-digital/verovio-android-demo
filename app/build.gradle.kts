@@ -57,6 +57,8 @@ android {
     }
 }
 
+////////////////////////////////////////////
+// Copy the verovio resource directory from the submodule to the project
 tasks.register<Copy>("copyVerovioData") {
     from(rootDir.resolve("external/verovio/data"))
     into("src/main/assets/verovio/data")
@@ -66,7 +68,8 @@ tasks.named("preBuild") {
     dependsOn("copyVerovioData")
 }
 
-
+////////////////////////////////////////////
+// Generate the java and cpp files using swig and write them into the project
 val swigOutputJava = file("src/main/java/org/verovio/lib")
 val swigOutputCpp = file("src/main/cpp/verovio_wrap.cxx")
 val swigInterfaceFile = file("${rootDir.absolutePath}/external/verovio/bindings/java/verovio.i")
