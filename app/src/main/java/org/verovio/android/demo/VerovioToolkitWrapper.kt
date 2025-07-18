@@ -2,25 +2,28 @@ package org.verovio.android.demo
 
 class VerovioToolkitWrapper(resourcePath: String) {
 
-    private var toolkit: Long = 0
+    private var toolkitOld: Long = 0
 
     init {
-        toolkit = constructor(resourcePath)
+        //toolkit = constructor(resourcePath)
+
+
     }
 
     fun release() {
-        if (toolkit != 0L) {
-            destructor(toolkit)
-            toolkit = 0L
+        if (toolkitOld != 0L) {
+            destructor(toolkitOld)
+            toolkitOld = 0L
         }
     }
 
-    fun getVersion(): String = GetVersion(toolkit)
-    fun getPageCount(): Int = GetPageCount(toolkit)
-    fun loadData(data: String): Boolean = LoadData(toolkit, data)
-    fun renderToSVG(page: Int): String = RenderToSVG(toolkit, page)
-    fun redoLayout() = RedoLayout(toolkit)
-    fun setOptions(jsonOptions: String): Boolean = SetOptions(toolkit, jsonOptions)
+
+    fun getVersion(): String = GetVersion(toolkitOld)
+    fun getPageCount(): Int = GetPageCount(toolkitOld)
+    fun loadData(data: String): Boolean = LoadData(toolkitOld, data)
+    fun renderToSVG(page: Int): String = RenderToSVG(toolkitOld, page)
+    fun redoLayout() = RedoLayout(toolkitOld)
+    fun setOptions(jsonOptions: String): Boolean = SetOptions(toolkitOld, jsonOptions)
 
     private external fun constructor(resourcePath: String): Long
     private external fun destructor(ptr: Long)

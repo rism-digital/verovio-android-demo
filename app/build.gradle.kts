@@ -66,6 +66,47 @@ tasks.named("preBuild") {
     dependsOn("copyVerovioData")
 }
 
+
+val swigOutputJava = file("src/main/java/org/verovio/lib")
+val swigOutputCpp = file("src/main/cpp/verovio_wrap.cxx")
+val swigInterfaceFile = file("${rootDir.absolutePath}/external/verovio/bindings/java/verovio.i")
+
+tasks.register<Exec>("generateSwigBindings") {
+    group = "build"
+    description = "Generate JNI bindings with SWIG"
+
+    // Adjust working directory to the project root
+    workingDir = rootProject.projectDir
+
+    // Ensure output directories exist
+    doFirst {
+        swigOutputJava.mkdirs()
+        swigOutputCpp.parentFile.mkdirs()
+    }
+
+    commandLine = listOf(
+        "swig", // Change to "/opt/homebrew/bin/swig" or something else if needed
+        "-java",
+        "-c++",
+        "-package", "org.verovio.lib",
+        "-outdir", swigOutputJava.absolutePath,
+        "-o", swigOutputCpp.absolutePath,
+        swigInterfaceFile.absolutePath
+    )
+}
+
+// Ensure SWIG runs before compilation
+tasks.named("preBuild") {
+    dependsOn("generateSwigBindings")
+}
+
+tasks.named("clean") {
+    doFirst {
+        delete("src/main/java/org/verovio/lib/*")
+        delete("src/main/cpp/verovio_wrap.cxx")
+    }
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)

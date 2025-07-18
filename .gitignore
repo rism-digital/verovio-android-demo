@@ -16,3 +16,5 @@ local.properties
 .idea
 app/src/main/assets/verovio
 app-release.aab
+app/src/main/java/org/verovio/lib
+verovio_wrap.cxx

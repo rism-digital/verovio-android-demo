@@ -1,21 +1,22 @@
 package org.verovio.android.demo
 
 
+import android.content.Context
+import android.content.res.AssetManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import android.content.Context
-import android.content.res.AssetManager
 import androidx.compose.ui.unit.IntSize
+import androidx.lifecycle.ViewModel
 import java.io.File
+import org.verovio.lib.toolkit
 
 class VerovioModelView() : ViewModel() {
 
     // Native wrapper instance
     private var initialized = false
     private lateinit var resourcePath: String
-    private lateinit var toolkitWrapper: VerovioToolkitWrapper
+    private lateinit var toolkit: toolkit
 
     var svgString = mutableStateOf("<svg></svg>")
     val fontOptions = listOf("Leipzig", "Bravura", "Leland", "Petaluma")
@@ -36,26 +37,31 @@ class VerovioModelView() : ViewModel() {
         copyAssetFolder(context.assets, "verovio/data", targetDir)
 
         // Init toolkit and load MEI
-        toolkitWrapper = VerovioToolkitWrapper(resourcePath)
+        toolkit = toolkit(false)
+        toolkit.setResourcePath(resourcePath)
+        toolkit.setOptions("{'svgViewBox': 'true'}")
+        toolkit.setOptions("{'scaleToPageSize': 'true'}")
+        toolkit.setOptions("{'adjustPageHeight': 'true'}")
+
         loadDefaultFile(context)
     }
 
     override fun onCleared() {
         super.onCleared()
-        toolkitWrapper.release()
+        toolkit.delete()
     }
 
     fun onPrevious() {
         if (currentPage > 1) {
             currentPage--
-            svgString.value = toolkitWrapper.renderToSVG(currentPage)
+            svgString.value = toolkit.renderToSVG(currentPage)
         }
     }
 
     fun onNext() {
-        if (currentPage < toolkitWrapper.getPageCount()) {
+        if (currentPage < toolkit.getPageCount()) {
             currentPage++
-            svgString.value = toolkitWrapper.renderToSVG(currentPage)
+            svgString.value = toolkit.renderToSVG(currentPage)
         }
     }
 
@@ -89,34 +95,34 @@ class VerovioModelView() : ViewModel() {
     fun loadDefaultFile(context: Context) {
         val inputStream = context.assets.open("test-01.mei")
         val mei = inputStream.bufferedReader().use { it.readText() }
-        toolkitWrapper.loadData(mei)
-        svgString.value = toolkitWrapper.renderToSVG(1)
+        toolkit.loadData(mei)
+        svgString.value = toolkit.renderToSVG(1)
     }
 
     private fun applyFont() {
         val scaleOptionsJSON = """{"font": "$selectedFont"}"""
-        toolkitWrapper.setOptions(scaleOptionsJSON)
-        toolkitWrapper.redoLayout()
-        if (toolkitWrapper.getPageCount() < currentPage) {
-            currentPage = toolkitWrapper.getPageCount()
+        toolkit.setOptions(scaleOptionsJSON)
+        toolkit.redoLayout()
+        if (toolkit.getPageCount() < currentPage) {
+            currentPage = toolkit.getPageCount()
         }
-        svgString.value = toolkitWrapper.renderToSVG(currentPage)
+        svgString.value = toolkit.renderToSVG(currentPage)
     }
 
     private fun applyZoom() {
         val scaleOptionsJSON = """{"scale": ${scaleValues[scaleIndex]}}"""
-        toolkitWrapper.setOptions(scaleOptionsJSON)
-        toolkitWrapper.redoLayout()
-        if (toolkitWrapper.getPageCount() < currentPage) {
-            currentPage = toolkitWrapper.getPageCount()
+        toolkit.setOptions(scaleOptionsJSON)
+        toolkit.redoLayout()
+        if (toolkit.getPageCount() < currentPage) {
+            currentPage = toolkit.getPageCount()
         }
-        svgString.value = toolkitWrapper.renderToSVG(currentPage)
+        svgString.value = toolkit.renderToSVG(currentPage)
     }
 
     private fun applySize() {
         val height = 2100f * viewSize.height / viewSize.width
         val sizeJSON = """{"pageHeight": $height}"""
-        toolkitWrapper.setOptions(sizeJSON)
+        toolkit.setOptions(sizeJSON)
         applyZoom()
     }
 
