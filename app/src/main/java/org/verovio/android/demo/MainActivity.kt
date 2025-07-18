@@ -90,16 +90,16 @@ fun TopAppBarWithMenu(viewModel: VerovioModelView) {
                     contentDescription = "Next"
                 )
             }
-            IconButton(onClick = { viewModel.onZoomIn() }) {
-                Icon(
-                    imageVector = Icons.Filled.ZoomIn,
-                    contentDescription = "Zoom In"
-                )
-            }
             IconButton(onClick = { viewModel.onZoomOut() }) {
                 Icon(
                     imageVector = Icons.Filled.ZoomOut,
                     contentDescription = "Zoom Out"
+                )
+            }
+            IconButton(onClick = { viewModel.onZoomIn() }) {
+                Icon(
+                    imageVector = Icons.Filled.ZoomIn,
+                    contentDescription = "Zoom In"
                 )
             }
             Box {
