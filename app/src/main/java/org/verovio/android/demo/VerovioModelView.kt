@@ -1,17 +1,19 @@
 package org.verovio.android.demo
 
+import java.io.File
 
 import android.content.Context
 import android.content.res.AssetManager
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
-import java.io.File
+
 import org.verovio.lib.toolkit
 
-class VerovioModelView() : ViewModel() {
+class VerovioModelView : ViewModel() {
 
     // Native wrapper instance
     private var initialized = false
@@ -51,29 +53,34 @@ class VerovioModelView() : ViewModel() {
         toolkit.delete()
     }
 
+    fun canPrevious(): Boolean { return (currentPage > 1) }
+    fun canNext(): Boolean { return (currentPage < toolkit.getPageCount()) }
+    fun canZoomOut(): Boolean { return (scaleIndex > 1) }
+    fun canZoomIn(): Boolean { return (scaleIndex < scaleValues.size - 1) }
+
     fun onPrevious() {
-        if (currentPage > 1) {
+        if (canPrevious()) {
             currentPage--
             svgString.value = toolkit.renderToSVG(currentPage)
         }
     }
 
     fun onNext() {
-        if (currentPage < toolkit.getPageCount()) {
+        if (canNext()) {
             currentPage++
             svgString.value = toolkit.renderToSVG(currentPage)
         }
     }
 
     fun onZoomIn() {
-        if (scaleIndex < scaleValues.size - 1) {
+        if (canZoomIn()) {
             scaleIndex++
             applyZoom()
         }
     }
 
     fun onZoomOut() {
-        if (scaleIndex > 0) {
+        if (canZoomOut()) {
             scaleIndex--
             applyZoom()
         }
@@ -88,11 +95,18 @@ class VerovioModelView() : ViewModel() {
 
     fun onSize(size: IntSize) {
         if (viewSize == size) return
-        viewSize = size;
+        viewSize = size
         applySize()
     }
 
-    fun loadDefaultFile(context: Context) {
+    fun loadFileContent(data: String) {
+        if (toolkit.loadData(data)) {
+            currentPage = 1
+            svgString.value = toolkit.renderToSVG(1)
+        }
+    }
+
+    private fun loadDefaultFile(context: Context) {
         val inputStream = context.assets.open("test-01.mei")
         val mei = inputStream.bufferedReader().use { it.readText() }
         toolkit.loadData(mei)

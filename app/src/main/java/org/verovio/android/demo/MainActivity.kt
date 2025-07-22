@@ -1,11 +1,16 @@
 package org.verovio.android.demo
 
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
+
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,11 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
-import org.verovio.android.demo.ui.theme.VerovioMEIViewerTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+
+import org.verovio.android.demo.ui.theme.VerovioMEIViewerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,28 +82,56 @@ class MainActivity : ComponentActivity() {
 fun TopAppBarWithMenu(viewModel: VerovioModelView) {
     var expanded by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
+    // Create a launcher to pick files
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                // Read the file content from URI and pass it to ViewModel
+                val content = readTextFromUri(context, it)
+                if (content != null) {
+                    viewModel.loadFileContent(content)
+                }
+            }
+        }
+    )
+
     TopAppBar(
         title = { },
         actions = {
-            IconButton(onClick = { viewModel.onPrevious() }) {
+            IconButton(onClick = {
+                viewModel.onPrevious() },
+                enabled = viewModel.canPrevious()
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Previous"
                 )
             }
-            IconButton(onClick = { viewModel.onNext() }) {
+            IconButton(
+                onClick = { viewModel.onNext() },
+                enabled = viewModel.canNext()
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = "Next"
                 )
             }
-            IconButton(onClick = { viewModel.onZoomOut() }) {
+            IconButton(
+                onClick = { viewModel.onZoomOut() },
+                enabled = viewModel.canZoomOut()
+            ) {
                 Icon(
                     imageVector = Icons.Filled.ZoomOut,
                     contentDescription = "Zoom Out"
                 )
             }
-            IconButton(onClick = { viewModel.onZoomIn() }) {
+            IconButton(
+                onClick = { viewModel.onZoomIn() },
+                enabled = viewModel.canZoomIn()
+            ) {
                 Icon(
                     imageVector = Icons.Filled.ZoomIn,
                     contentDescription = "Zoom In"
@@ -120,6 +155,19 @@ fun TopAppBarWithMenu(viewModel: VerovioModelView) {
                         )
                     }
                 }
+            }
+            // New button for file picker
+            TextButton(onClick = {
+                // Launch file picker for MEI, MusicXML, or MXL mime types
+                launcher.launch(arrayOf(
+                    "application/vnd.recordare.musicxml",
+                    "application/xml",
+                    "text/xml",
+                    "application/octet-stream",  // For .mxl binary zipped files
+                    "application/x-zip-compressed" // Sometimes .mxl is zipped
+                ))
+            }) {
+                Text("Load File")
             }
         }
     )
@@ -162,4 +210,15 @@ fun SvgWebView(
                 onSizeChanged(size)
             }
     )
+}
+
+fun readTextFromUri(context: Context, uri: Uri): String? {
+    return try {
+        context.contentResolver.openInputStream(uri)?.bufferedReader().use { reader ->
+            reader?.readText()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }

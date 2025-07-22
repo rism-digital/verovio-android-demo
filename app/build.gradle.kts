@@ -12,7 +12,7 @@ android {
         applicationId = "org.verovio.android.demo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -88,7 +88,7 @@ tasks.register<Exec>("generateSwigBindings") {
     }
 
     commandLine = listOf(
-        "swig", // Change to "/opt/homebrew/bin/swig" or something else if needed
+        "/opt/homebrew/bin/swig", // Change to "/opt/homebrew/bin/swig" or something else if needed
         "-java",
         "-c++",
         "-package", "org.verovio.lib",
@@ -128,7 +128,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
 
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 }
