@@ -4,6 +4,7 @@ import java.io.File
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.net.Uri
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +13,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 
 import org.verovio.lib.toolkit
+import java.io.FileOutputStream
 
 class VerovioModelView : ViewModel() {
 
@@ -99,8 +101,8 @@ class VerovioModelView : ViewModel() {
         applySize()
     }
 
-    fun loadFileContent(data: String) {
-        if (toolkit.loadData(data)) {
+    fun onLoadFile(filename: String) {
+        if (toolkit.loadFile(filename)) {
             currentPage = 1
             svgString.value = toolkit.renderToSVG(1)
         }

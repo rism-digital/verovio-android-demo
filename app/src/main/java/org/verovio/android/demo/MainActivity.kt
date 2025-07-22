@@ -1,5 +1,8 @@
 package org.verovio.android.demo
 
+import java.io.File
+import java.io.FileOutputStream
+
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
@@ -89,10 +92,11 @@ fun TopAppBarWithMenu(viewModel: VerovioModelView) {
         contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri: Uri? ->
             uri?.let {
-                // Read the file content from URI and pass it to ViewModel
-                val content = readTextFromUri(context, it)
-                if (content != null) {
-                    viewModel.loadFileContent(content)
+                // Since Verovio does not support URIs
+                val tempFile = copyUriToTempFile(context, it)
+                tempFile?.let { file ->
+                    // Now we can pass it to Verovio
+                    viewModel.onLoadFile(file.absolutePath)
                 }
             }
         }
@@ -212,11 +216,18 @@ fun SvgWebView(
     )
 }
 
-fun readTextFromUri(context: Context, uri: Uri): String? {
+private fun copyUriToTempFile(context: Context, uri: Uri): File? {
     return try {
-        context.contentResolver.openInputStream(uri)?.bufferedReader().use { reader ->
-            reader?.readText()
+        val fileName = uri.lastPathSegment?.substringAfterLast('/') ?: "tempfile"
+        val tempFile = File(context.cacheDir, fileName)
+
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(tempFile).use { output ->
+                input.copyTo(output)
+            }
         }
+
+        tempFile
     } catch (e: Exception) {
         e.printStackTrace()
         null
