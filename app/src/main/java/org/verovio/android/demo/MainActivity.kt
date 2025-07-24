@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.filled.ZoomOut
 import androidx.compose.material3.DropdownMenu
@@ -83,7 +84,9 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBarWithMenu(viewModel: VerovioModelView) {
-    var expanded by remember { mutableStateOf(false) }
+    // State of the font dropdown and the about dialog
+    var showFontDropdown by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -142,19 +145,19 @@ fun TopAppBarWithMenu(viewModel: VerovioModelView) {
                 )
             }
             Box {
-                IconButton(onClick = { expanded = true }) {
+                IconButton(onClick = { showFontDropdown = true }) {
                     Text("Font")
                 }
                 DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    expanded = showFontDropdown,
+                    onDismissRequest = { showFontDropdown = false }
                 ) {
                     viewModel.fontOptions.forEach { font ->
                         DropdownMenuItem(
                             text = { Text(font) },
                             onClick = {
                                 viewModel.onFontSelect(font)
-                                expanded = false
+                                showFontDropdown = false
                             }
                         )
                     }
@@ -173,8 +176,14 @@ fun TopAppBarWithMenu(viewModel: VerovioModelView) {
             }) {
                 Text("Load File")
             }
+
+            IconButton(onClick = { showAboutDialog = true }) {
+                Icon(Icons.Default.Info, contentDescription = "About")
+            }
         }
     )
+
+    AboutDialog(show = showAboutDialog, onDismiss = { showAboutDialog = false }, version = viewModel.getVersion())
 }
 
 @Composable
@@ -214,6 +223,29 @@ fun SvgWebView(
                 onSizeChanged(size)
             }
     )
+}
+
+@Composable
+fun AboutDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    version: String
+) {
+    if (show) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("OK")
+                }
+            },
+            title = { Text("About") },
+            text = {
+                val msg = """Verovio version $version"""
+                Text(msg)
+            }
+        )
+    }
 }
 
 private fun copyUriToTempFile(context: Context, uri: Uri): File? {

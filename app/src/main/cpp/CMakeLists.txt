@@ -11,8 +11,14 @@ set(BUILD_AS_ANDROID_LIBRARY ON)
 # Add the subdirectory with the Verovio CMakeLists.txt and a binary dir
 add_subdirectory(${VEROVIO_SOURCE_DIR}/cmake ${CMAKE_CURRENT_BINARY_DIR}/verovio_build)
 # Add the include paths with the Verovio files (for the toolkit)
-file(GLOB VRV_INCLUDES "${VEROVIO_SOURCE_DIR}/include/*" "${VEROVIO_SOURCE_DIR}/libmei/*")
-include_directories(${VRV_INCLUDES})
+include_directories(
+        ${VEROVIO_SOURCE_DIR}/include/vrv
+        ${VEROVIO_SOURCE_DIR}/include/json
+        ${VEROVIO_SOURCE_DIR}/include/pugi
+        ${VEROVIO_SOURCE_DIR}/libmei/dist
+        ${VEROVIO_SOURCE_DIR}/libmei/addons
+        ${VEROVIO_SOURCE_DIR}/include/vrv
+)
 
 # Declare and name the project.
 project("verovio-android")

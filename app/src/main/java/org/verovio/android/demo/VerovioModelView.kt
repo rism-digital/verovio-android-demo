@@ -4,7 +4,6 @@ import java.io.File
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.net.Uri
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,7 +12,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 
 import org.verovio.lib.toolkit
-import java.io.FileOutputStream
 
 class VerovioModelView : ViewModel() {
 
@@ -59,6 +57,7 @@ class VerovioModelView : ViewModel() {
     fun canNext(): Boolean { return (currentPage < toolkit.getPageCount()) }
     fun canZoomOut(): Boolean { return (scaleIndex > 1) }
     fun canZoomIn(): Boolean { return (scaleIndex < scaleValues.size - 1) }
+    fun getVersion(): String { return toolkit.getVersion() }
 
     fun onPrevious() {
         if (canPrevious()) {
@@ -74,16 +73,16 @@ class VerovioModelView : ViewModel() {
         }
     }
 
-    fun onZoomIn() {
-        if (canZoomIn()) {
-            scaleIndex++
+    fun onZoomOut() {
+        if (canZoomOut()) {
+            scaleIndex--
             applyZoom()
         }
     }
 
-    fun onZoomOut() {
-        if (canZoomOut()) {
-            scaleIndex--
+    fun onZoomIn() {
+        if (canZoomIn()) {
+            scaleIndex++
             applyZoom()
         }
     }
@@ -104,7 +103,7 @@ class VerovioModelView : ViewModel() {
     fun onLoadFile(filename: String) {
         if (toolkit.loadFile(filename)) {
             currentPage = 1
-            svgString.value = toolkit.renderToSVG(1)
+            updateSvg()
         }
     }
 
@@ -112,7 +111,7 @@ class VerovioModelView : ViewModel() {
         val inputStream = context.assets.open("test-01.mei")
         val mei = inputStream.bufferedReader().use { it.readText() }
         toolkit.loadData(mei)
-        svgString.value = toolkit.renderToSVG(1)
+        updateSvg()
     }
 
     private fun applyFont() {
@@ -122,7 +121,14 @@ class VerovioModelView : ViewModel() {
         if (toolkit.getPageCount() < currentPage) {
             currentPage = toolkit.getPageCount()
         }
-        svgString.value = toolkit.renderToSVG(currentPage)
+        updateSvg()
+    }
+
+    private fun applySize() {
+        val height = 2100f * viewSize.height / viewSize.width
+        val sizeJSON = """{"pageHeight": $height}"""
+        toolkit.setOptions(sizeJSON)
+        applyZoom()
     }
 
     private fun applyZoom() {
@@ -132,14 +138,11 @@ class VerovioModelView : ViewModel() {
         if (toolkit.getPageCount() < currentPage) {
             currentPage = toolkit.getPageCount()
         }
-        svgString.value = toolkit.renderToSVG(currentPage)
+        updateSvg()
     }
 
-    private fun applySize() {
-        val height = 2100f * viewSize.height / viewSize.width
-        val sizeJSON = """{"pageHeight": $height}"""
-        toolkit.setOptions(sizeJSON)
-        applyZoom()
+    private fun updateSvg() {
+        svgString.value = toolkit.renderToSVG(currentPage)
     }
 
     private fun copyAssetFolder(assetManager: AssetManager, fromAssetPath: String, toPath: File) {
