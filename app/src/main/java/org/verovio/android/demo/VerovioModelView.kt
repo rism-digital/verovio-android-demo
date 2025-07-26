@@ -44,6 +44,7 @@ class VerovioModelView : ViewModel() {
         toolkit.setOptions("{'svgViewBox': 'true'}")
         toolkit.setOptions("{'scaleToPageSize': 'true'}")
         toolkit.setOptions("{'adjustPageHeight': 'true'}")
+        toolkit.setOptions("{'fontTextLiberation': 'true'}")
 
         loadDefaultFile(context)
     }
