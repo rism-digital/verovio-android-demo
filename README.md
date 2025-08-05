@@ -59,4 +59,4 @@ Native compilation is managed by CMake, which is configured to:
 
 ## License
 
-This project is licensed under the AGPL — see the LICENSE file for details.
+This project is licensed under the AGPL — see the MIT file for details.
