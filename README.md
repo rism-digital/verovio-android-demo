@@ -2,6 +2,10 @@
 
 An Android demo application showcasing the integration of the [Verovio](https://www.verovio.org) Toolkit for rendering MEI (Music Encoding Initiative) music notation files as scalable SVG graphics.
 
+https://play.google.com/store/apps/details?id=org.verovio.android.demo
+
+<img width="296" height="592" alt="Image" src="https://github.com/user-attachments/assets/5bc764e8-de78-4d20-b9aa-a3fe3a95930b" />
+
 ## Overview
 
 This project demonstrates how to embed the Verovio music notation rendering library in an Android app using Kotlin and Jetpack Compose. It provides basic controls to load MEI files, navigate pages, zoom in/out, and display music notation using a WebView.
