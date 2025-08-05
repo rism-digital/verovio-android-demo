@@ -2,9 +2,9 @@
 
 An Android demo application showcasing the integration of the [Verovio](https://www.verovio.org) Toolkit for rendering MEI (Music Encoding Initiative) music notation files as scalable SVG graphics.
 
-https://play.google.com/store/apps/details?id=org.verovio.android.demo
+Run the App from [Google Play](https://play.google.com/store/apps/details?id=org.verovio.android.demo)
 
-<img width="296" height="592" alt="Image" src="https://github.com/user-attachments/assets/5bc764e8-de78-4d20-b9aa-a3fe3a95930b" />
+<img width="540" height="1080" alt="image" src="https://github.com/user-attachments/assets/e38607a1-68ae-4bce-b8a7-05fcaffd8024" />
 
 ## Overview
 
