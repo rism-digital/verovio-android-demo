@@ -17,7 +17,6 @@ include_directories(
         ${VEROVIO_SOURCE_DIR}/include/pugi
         ${VEROVIO_SOURCE_DIR}/libmei/dist
         ${VEROVIO_SOURCE_DIR}/libmei/addons
-        ${VEROVIO_SOURCE_DIR}/include/vrv
 )
 
 # Declare and name the project.
@@ -25,6 +24,9 @@ project("verovio-android")
 
 # Creates a library with the C++ jni code
 add_library(verovio-android SHARED ${SWIG_WRAP_FILE})
+
+# Setting for the linker to align segments at 16 KB (0x4000)
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=0x4000")
 
 # Add the log library
 find_library(log-lib log)
